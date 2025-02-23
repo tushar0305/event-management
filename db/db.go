@@ -37,3 +37,4 @@ func createTables() {
         panic("Could not create event tables!")
     }
 }
+

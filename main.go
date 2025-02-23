@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 	"github.com/gin-gonic/gin"
 	"github.com/tushar0305/event-management/db"
 	"github.com/tushar0305/event-management/models"
@@ -11,13 +12,14 @@ func main(){
 	db.InitDb()
 	server := gin.Default()
 
-	server.GET("/events", getEvent)
+	server.GET("/events", getEvents)
 	server.POST("/events", createEvent)
+	server.GET("/events/:id", getEvent)
 
 	server.Run(":8080") //localhost
 }
 
-func getEvent(context *gin.Context){
+func getEvents(context *gin.Context){
 	events, err := models.GetAllEvents()
 	if err != nil{
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch events. Try again Later!"})
@@ -43,4 +45,20 @@ func createEvent(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusCreated, gin.H{"message": "event created!", "events": event})
+}
+
+func getEvent(context *gin.Context) {
+	eventId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil{
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse event id!"})
+		return
+	}
+
+	event, err := models.GetEventById(eventId)
+	if err != nil{
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch event id!"})
+		return
+	}
+
+	context.JSON(http.StatusOK, event)
 }
