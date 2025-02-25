@@ -3,8 +3,10 @@ package routes
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"github.com/gin-gonic/gin"
 	"github.com/tushar0305/event-management/models"
+	"github.com/tushar0305/event-management/utils"
 )
 
 func GetEvents(context *gin.Context){
@@ -17,22 +19,36 @@ func GetEvents(context *gin.Context){
 }
 
 func CreateEvent(context *gin.Context) {
-	var event models.Event
-	err := context.ShouldBindJSON(&event)
-	if err != nil{
-		context.JSON(http.StatusBadRequest, gin.H{"message": "could not parse"})
+	token := context.Request.Header.Get("Authorization")
+	if token == ""{
+		context.JSON(http.StatusUnauthorized, gin.H{"message":"User not authorized!"})
 		return
 	}
 
-	event.Id = 1
-	event.UserId = 1
+	// Remove "Bearer " prefix if present
+	token = strings.TrimPrefix(token, "Bearer ")
+
+	userId, err := utils.VerifyToken(token)
+	if err != nil{
+		context.JSON(http.StatusUnauthorized, gin.H{"message":"User not authorized!"})
+		return
+	}
+
+	var event models.Event
+	err = context.ShouldBindJSON(&event)
+	if err != nil{
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse request data"})
+		return
+	}
+
+	event.UserId = userId
 
 	err = event.Save()
 	if err != nil{
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not create events. Try again Later!"})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not create event. Try again later!"})
 		return
 	}
-	context.JSON(http.StatusCreated, gin.H{"message": "event created!", "events": event})
+	context.JSON(http.StatusOK, gin.H{"message": "Event created successfully!"})
 }
 
 func GetEvent(context *gin.Context) {
@@ -96,7 +112,7 @@ func DeleteEvent(context *gin.Context) {
 	}
 
 	err = event.DeleteEventById()
-	if err != nil {
+	if err != nil{
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not Delete the event!"})
 		return
 	}
