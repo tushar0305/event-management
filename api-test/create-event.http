@@ -3,8 +3,8 @@ content-type: application/json
 Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRleHRhdXRoMkBnbWFpbC5jb20iLCJleHAiOjE3NDA1MTk2MjYsInVzZXJJZCI6NH0.ymR9pS9rbHAuPHnt_GVIn95ffxsF4lv3hdYy8Pe5RPE
 
 {
-    "name": "Test event Auth2",
-    "description": "A Test Event Auth2",
-    "location": "Test Location Auth2",
+    "name": "Test event Auth2!!!",
+    "description": "A Test Event Auth2!!!",
+    "location": "Test Location Auth2!!!!",
     "dateTime": "2025-02-01T15:30:30.000Z"
 }
