@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+	"database/sql"
 	"github.com/tushar0305/event-management/db"
 	"github.com/tushar0305/event-management/utils"
 )
@@ -38,4 +40,26 @@ func (u *User) Save() (int64, error) {
 
 	u.Id = UserId
 	return UserId, nil
+}
+
+func (u *User) ValidateCred() error {
+	query := `SELECT id, email, password FROM users WHERE email = ?`
+	row := db.DB.QueryRow(query, u.Email)
+
+	var retrievedPassword string
+	err := row.Scan(&u.Id, &u.Email, &retrievedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("user not found")
+		}
+		return err
+	}
+
+	// Compare hashed password
+	passwordIsValid := utils.CheckPasswordHash(u.Password, retrievedPassword)
+	if !passwordIsValid {
+		return errors.New("invalid credentials")
+	}
+
+	return nil
 }

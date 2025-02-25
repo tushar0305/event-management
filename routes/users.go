@@ -25,3 +25,31 @@ func SignUp(context *gin.Context){
 	context.JSON(http.StatusOK, gin.H{"message": "user created sucessfully"})
 
 }
+
+func Login(context *gin.Context) {
+	var user models.User
+
+	err := context.ShouldBindJSON(&user)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "could not parse data"})
+		return
+	}
+
+	err = user.ValidateCred()
+	if err != nil {
+		if err.Error() == "user not found" {
+			context.JSON(http.StatusNotFound, gin.H{"message": "User not found!"})
+			return
+		} else if err.Error() == "invalid credentials" {
+			context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid email or password!"})
+			return
+		}
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong!"})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Login Successful!",
+		"user_id": user.Id, // Returning user ID for further use
+	})
+}
