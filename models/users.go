@@ -1,6 +1,9 @@
 package models
 
-import "github.com/tushar0305/event-management/db"
+import (
+	"github.com/tushar0305/event-management/db"
+	"github.com/tushar0305/event-management/utils"
+)
 
 type User struct{
 	Id 			int64	`json:"id"`
@@ -18,7 +21,12 @@ func (u *User) Save() (int64, error) {
 
 	defer stmt.Close()
 
-	result, err := stmt.Exec(u.Email, u.Password)
+	hashedPassword, err := utils.HashPassword(u.Password)
+	if err != nil{
+		return 0, err
+	}
+
+	result, err := stmt.Exec(u.Email, hashedPassword)
 	if err != nil {
 		return 0, err
 	}
