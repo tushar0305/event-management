@@ -142,3 +142,8 @@ func RegisterUserForEvent(userId, eventId int64) error {
     _, err := db.DB.Exec("INSERT INTO event_registrations (userId, eventId) VALUES (?, ?)", userId, eventId)
     return err
 }
+
+func CancelUserRegistration(userId, eventId int64) error {
+    _, err := db.DB.Exec("DELETE FROM event_registrations WHERE userId = ? AND eventId = ?", userId, eventId)
+    return err
+}
